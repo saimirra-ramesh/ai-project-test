@@ -26,19 +26,15 @@ def extract_test_functions(file_path):
 
         test_functions = {}
 
-        for match in re.finditer(func_pattern, content, re.MULTILINE):
+        matches = list(re.finditer(func_pattern, content, re.MULTILINE))
+        for i, match in enumerate(matches):
             func_name = match.group(1)
-            
             start_pos = match.start()
-            
-            next_def = re.search(r'^\s*def\s+', content[start_pos+1:], re.MULTILINE)
-            next_class = re.search(r'^\s*class\s+', content[start_pos+1:], re.MULTILINE)
-            
-            end_pos = len(content)
-            if next_def:
-                end_pos = min(end_pos, start_pos + 1 + next_def.start())
-            if next_class:
-                end_pos = min(end_pos, start_pos + 1 + next_class.start())
+            # Determine end position based on the next test function or end of file
+            if i < len(matches) - 1:
+                end_pos = matches[i+1].start()
+            else:
+                end_pos = len(content)
             
             # Extract the full function code
             full_match = content[start_pos:end_pos].strip()
